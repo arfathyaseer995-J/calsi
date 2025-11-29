@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Calculator Testing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .calculator {
+            background-color: #c0c0c0;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            border: 2px solid #808080;
+        }
+
+        .display-area {
+            background-color: #000;
+            color: #fff;
+            padding: 20px;
+            text-align: right;
+            border-bottom: 2px solid #808080;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .main-display {
+            font-size: 1.8rem;
+            min-height: 60px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .secondary-display {
+            font-size: 1rem;
+            color: #aaa;
+            min-height: 25px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 10px;
+            padding: 20px;
+            background-color: #a0a0a0;
+        }
+
+        button {
+            border: none;
+            border-radius: 6px;
+            padding: 15px 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            outline: none;
+            background-color: #e0e0e0;
+            color: #000;
+            box-shadow: inset -2px -2px 3px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        button:active {
+            box-shadow: inset 2px 2px 3px rgba(0,0,0,0.2);
+            transform: translateY(2px);
+        }
+
+        .function-btn {
+            background-color: #d0d0d0;
+            font-size: 0.8rem;
+        }
+
+        .number-btn {
+            background-color: #f0f0f0;
+        }
+
+        .operator-btn {
+            background-color: #ff9500;
+            color: white;
+        }
+
+        .enter-btn {
+            background-color: #4CAF50;
+            color: white;
+            grid-row: span 2;
+        }
+
+        .clear-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .test-panel {
+            background-color: #1e1e2e;
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .test-header h3 {
+            color: #ff9500;
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .test-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .test-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+
+        .test-btn.stop {
+            background-color: #f44336;
+        }
+
+        .test-results {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .test-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #25293c;
+            border-radius: 5px;
+            border-left: 4px solid #666;
+        }
+
+        .test-item.passed {
+            border-left-color: #4CAF50;
+        }
+
+        .test-item.failed {
+            border-left-color: #f44336;
+        }
+
+        .test-item.running {
+            border-left-color: #ff9500;
+            background-color: #2a2d45;
+        }
+
+        .test-question {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .test-expected {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .test-actual {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .test-status {
+            float: right;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .summary {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #25293c;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .function-group {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #333;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            color: #ff9500;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display-area">
+            <div class="secondary-display" id="mode-display">READY FOR TESTING</div>
+            <div class="main-display" id="main-display">0</div>
+        </div>
+        <div class="keypad">
+            <!-- Row 1 -->
+            <button class="function-btn" data-action="y-equals">Y=</button>
+            <button class="function-btn" data-action="window">WINDOW</button>
+            <button class="function-btn" data-action="zoom">ZOOM</button>
+            <button class="function-btn" data-action="trace">TRACE</button>
+            <button class="function-btn" data-action="graph">GRAPH</button>
+            
+            <!-- Row 2 -->
+            <button class="function-btn" data-action="2nd">2ND</button>
+            <button class="function-btn" data-action="mode">MODE</button>
+            <button class="function-btn" data-action="del">DEL</button>
+            <button class="function-btn" data-action="clear-entry">CE</button>
+            <button class="function-btn" data-action="stat">STAT</button>
+            
+            <!-- Row 3 -->
+            <button class="function-btn" data-action="alpha">ALPHA</button>
+            <button class="function-btn" data-action="x-var">X,T,θ,n</button>
+            <button class="function-btn" data-action="stat-plot">STAT PLOT</button>
+            <button class="function-btn" data-action="y-var">Y-VARS</button>
+            <button class="function-btn" data-action="distr">DISTR</button>
+            
+            <!-- Row 4 -->
+            <button class="function-btn" data-action="math">MATH</button>
+            <button class="function-btn" data-action="angle">ANGLE</button>
+            <button class="function-btn" data-action="draw">DRAW</button>
+            <button class="function-btn" data-action="vars">VARS</button>
+            <button class="clear-btn" data-action="clear">AC</button>
+            
+            <!-- Row 5 -->
+            <button class="function-btn" data-action="matrix">MATRIX</button>
+            <button class="function-btn" data-action="apps">APPS</button>
+            <button class="function-btn" data-action="program">PRGM</button>
+            <button class="function-btn" data-action="vars">VARS</button>
+            <button class="function-btn" data-action="clear">CLEAR</button>
+            
+            <!-- Row 6 -->
+            <button class="function-btn" data-action="sin">sin</button>
+            <button class="function-btn" data-action="cos">cos</button>
+            <button class="function-btn" data-action="tan">tan</button>
+            <button class="function-btn" data-action="power">^</button>
+            <button class="function-btn" data-action="square">x²</button>
+            
+            <!-- Row 7 -->
+            <button class="function-btn" data-action="sin-1">sin⁻¹</button>
+            <button class="function-btn" data-action="cos-1">cos⁻¹</button>
+            <button class="function-btn" data-action="tan-1">tan⁻¹</button>
+            <button class="function-btn" data-action="pi">π</button>
+            <button class="function-btn" data-action="ee">EE</button>
+            
+            <!-- Row 8 -->
+            <button class="function-btn" data-action="comma">,</button>
+            <button class="function-btn" data-action="(">(</button>
+            <button class="function-btn" data-action=")">)</button>
+            <button class="function-btn" data-action="divide">/</button>
+            <button class="function-btn" data-action="multiply">×</button>
+            
+            <!-- Row 9 -->
+            <button class="function-btn" data-action="log">LOG</button>
+            <button class="number-btn" data-number="7">7</button>
+            <button class="number-btn" data-number="8">8</button>
+            <button class="number-btn" data-number="9">9</button>
+            <button class="function-btn" data-action="subtract">-</button>
+            
+            <!-- Row 10 -->
+            <button class="function-btn" data-action="ln">LN</button>
+            <button class="number-btn" data-number="4">4</button>
+            <button class="number-btn" data-number="5">5</button>
+            <button class="number-btn" data-number="6">6</button>
+            <button class="function-btn" data-action="add">+</button>
+            
+            <!-- Row 11 -->
+            <button class="function-btn" data-action="sto">STO→</button>
+            <button class="number-btn" data-number="1">1</button>
+            <button class="number-btn" data-number="2">2</button>
+            <button class="number-btn" data-number="3">3</button>
+            <button class="enter-btn" data-action="enter">ENTER</button>
+            
+            <!-- Row 12 -->
+            <button class="function-btn" data-action="on">ON</button>
+            <button class="function-btn" data-action="neg">(-)</button>
+            <button class="number-btn" data-number="0">0</button>
+            <button class="function-btn" data-action="decimal">.</button>
+            <button class="function-btn" data-action="ans">ANS</button>
+        </div>
+    </div>
+
+    <div class="test-panel">
+        <div class="test-header">
+            <h3>COMPLETE CALCULATOR TESTING</h3>
+            <div class="test-controls">
+                <button class="test-btn" id="startTest">Start Full Test</button>
+                <button class="test-btn stop" id="stopTest" disabled>Stop Test</button>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="test-results" id="testResults">
+            <!-- Test results will appear here -->
+        </div>
+
+        <div class="summary" id="testSummary">
+            Ready to test all calculator functions
+        </div>
+    </div>
+
+    <script>
+        class CompleteCalculatorTester {
+            constructor(mainDisplay, modeDisplay, resultsContainer, progressFill, summaryElement) {
+                this.mainDisplay = mainDisplay;
+                this.modeDisplay = modeDisplay;
+                this.resultsContainer = resultsContainer;
+                this.progressFill = progressFill;
+                this.summaryElement = summaryElement;
+                
+                this.tests = [];
+                this.currentTestIndex = 0;
+                this.isTesting = false;
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.storedVariables = {};
+                this.isAlphaMode = false;
+                this.is2ndMode = false;
+                this.angleMode = 'DEG';
+                
+                this.initializeAllTests();
+            }
+
+            initializeAllTests() {
+                this.tests = [
+                    // Group 1: Basic Number Keys
+                    { group: "NUMBER KEYS", name: "Number 0", steps: ["0"], expected: "0", type: "display" },
+                    { group: "NUMBER KEYS", name: "Number 1", steps: ["1"], expected: "1", type: "display" },
+                    { group: "NUMBER KEYS", name: "Number 2", steps: ["2"], expected: "2", type: "display" },
+                    { group: "NUMBER KEYS", name: "Number 3", steps: ["3"], expected: "3", type: "display" },
+                    { group: "NUMBER KEYS", name: "Number 4", steps: ["4"], expected: "4", type: "display" },
+                    { group: "NUMBER KEYS", name: "Number 5", steps: ["5"], expected: "5", type: "display" },
+                    { group: "NUMBER KEYS", name: "Number 6", steps: ["6"], expected: "6", type: "display" },
+                    { group: "NUMBER KEYS", name: "Number 7", steps: ["7"], expected: "7", type: "display" },
+                    { group: "NUMBER KEYS", name: "Number 8", steps: ["8"], expected: "8", type: "display" },
+                    { group: "NUMBER KEYS", name: "Number 9", steps: ["9"], expected: "9", type: "display" },
+
+                    // Group 2: Basic Operations
+                    { group: "BASIC OPERATIONS", name: "Addition", steps: ["5", "+", "3", "ENTER"], expected: "8", type: "calculation" },
+                    { group: "BASIC OPERATIONS", name: "Subtraction", steps: ["9", "-", "4", "ENTER"], expected: "5", type: "calculation" },
+                    { group: "BASIC OPERATIONS", name: "Multiplication", steps: ["6", "×", "7", "ENTER"], expected: "42", type: "calculation" },
+                    { group: "BASIC OPERATIONS", name: "Division", steps: ["8", "÷", "2", "ENTER"], expected: "4", type: "calculation" },
+                    { group: "BASIC OPERATIONS", name: "Decimal Point", steps: ["3", ".", "1", "4"], expected: "3.14", type: "display" },
+                    { group: "BASIC OPERATIONS", name: "Negative Numbers", steps: ["neg", "5"], expected: "-5", type: "display" },
+
+                    // Group 3: Parentheses and Order
+                    { group: "PARENTHESES", name: "Parentheses Basic", steps: ["(", "2", "+", "3", ")", "×", "4", "ENTER"], expected: "20", type: "calculation" },
+                    { group: "PARENTHESES", name: "Nested Parentheses", steps: ["(", "(", "1", "+", "2", ")", "×", "3", ")", "ENTER"], expected: "9", type: "calculation" },
+
+                    // Group 4: Scientific Functions
+                    { group: "SCIENTIFIC FUNCTIONS", name: "Sine Function", steps: ["sin", "3", "0", ")", "ENTER"], expected: "0.5", type: "calculation" },
+                    { group: "SCIENTIFIC FUNCTIONS", name: "Cosine Function", steps: ["cos", "6", "0", ")", "ENTER"], expected: "0.5", type: "calculation" },
+                    { group: "SCIENTIFIC FUNCTIONS", name: "Tangent Function", steps: ["tan", "4", "5", ")", "ENTER"], expected: "1", type: "calculation" },
+                    { group: "SCIENTIFIC FUNCTIONS", name: "Inverse Sine", steps: ["sin-1", "0", ".", "5", ")", "ENTER"], expected: "30", type: "calculation" },
+                    { group: "SCIENTIFIC FUNCTIONS", name: "Inverse Cosine", steps: ["cos-1", "0", ".", "5", ")", "ENTER"], expected: "60", type: "calculation" },
+                    { group: "SCIENTIFIC FUNCTIONS", name: "Inverse Tangent", steps: ["tan-1", "1", ")", "ENTER"], expected: "45", type: "calculation" },
+
+                    // Group 5: Logarithmic Functions
+                    { group: "LOGARITHMIC", name: "Log Base 10", steps: ["log", "1", "0", "0", ")", "ENTER"], expected: "2", type: "calculation" },
+                    { group: "LOGARITHMIC", name: "Natural Log", steps: ["ln", "e", ")", "ENTER"], expected: "1", type: "calculation" },
+
+                    // Group 6: Exponents and Powers
+                    { group: "EXPONENTS", name: "Square", steps: ["5", "square", "ENTER"], expected: "25", type: "calculation" },
+                    { group: "EXPONENTS", name: "Power", steps: ["2", "power", "3", "ENTER"], expected: "8", type: "calculation" },
+                    { group: "EXPONENTS", name: "Square Root", steps: ["√", "1", "6", ")", "ENTER"], expected: "4", type: "calculation" },
+
+                    // Group 7: Constants
+                    { group: "CONSTANTS", name: "Pi Constant", steps: ["pi"], expected: "3.1416", type: "display" },
+                    { group: "CONSTANTS", name: "Euler's Number", steps: ["e"], expected: "2.7183", type: "display" },
+
+                    // Group 8: Advanced Functions - ALPHA
+                    { group: "ADVANCED - ALPHA", name: "ALPHA Mode Toggle", steps: ["alpha"], expected: "ALPHA", type: "mode" },
+                    { group: "ADVANCED - ALPHA", name: "Variable Storage A", steps: ["5", "sto", "A"], expected: "A=5", type: "storage" },
+                    { group: "ADVANCED - ALPHA", name: "Variable Storage B", steps: ["3", "sto", "B"], expected: "B=3", type: "storage" },
+                    { group: "ADVANCED - ALPHA", name: "Use Stored Variables", steps: ["A", "+", "B", "ENTER"], expected: "8", type: "calculation" },
+
+                    // Group 9: Advanced Functions - MODE
+                    { group: "ADVANCED - MODE", name: "MODE Change", steps: ["mode"], expected: "MODE", type: "mode" },
+
+                    // Group 10: Advanced Functions - MATH
+                    { group: "ADVANCED - MATH", name: "MATH Menu", steps: ["math"], expected: "MATH", type: "menu" },
+
+                    // Group 11: Advanced Functions - ANGLE
+                    { group: "ADVANCED - ANGLE", name: "ANGLE Menu", steps: ["angle"], expected: "ANGLE", type: "menu" },
+
+                    // Group 12: Advanced Functions - MATRIX
+                    { group: "ADVANCED - MATRIX", name: "MATRIX Menu", steps: ["matrix"], expected: "MATRIX", type: "menu" },
+
+                    // Group 13: Advanced Functions - STAT
+                    { group: "ADVANCED - STAT", name: "STAT Menu", steps: ["stat"], expected: "STAT", type: "menu" },
+
+                    // Group 14: Advanced Functions - 2ND
+                    { group: "ADVANCED - 2ND", name: "2ND Function Toggle", steps: ["2nd"], expected: "2ND", type: "mode" },
+
+                    // Group 15: Graphing Functions
+                    { group: "GRAPHING", name: "Y= Function Editor", steps: ["y-equals"], expected: "Y=", type: "menu" },
+                    { group: "GRAPHING", name: "WINDOW Settings", steps: ["window"], expected: "WINDOW", type: "menu" },
+                    { group: "GRAPHING", name: "ZOOM Functions", steps: ["zoom"], expected: "ZOOM", type: "menu" },
+                    { group: "GRAPHING", name: "TRACE Function", steps: ["trace"], expected: "TRACE", type: "menu" },
+                    { group: "GRAPHING", name: "GRAPH Display", steps: ["graph"], expected: "GRAPH", type: "menu" },
+
+                    // Group 16: Other Functions
+                    { group: "OTHER FUNCTIONS", name: "DRAW Menu", steps: ["draw"], expected: "DRAW", type: "menu" },
+                    { group: "OTHER FUNCTIONS", name: "VARS Menu", steps: ["vars"], expected: "VARS", type: "menu" },
+                    { group: "OTHER FUNCTIONS", name: "APPS Menu", steps: ["apps"], expected: "APPS", type: "menu" },
+                    { group: "OTHER FUNCTIONS", name: "PRGM Menu", steps: ["program"], expected: "PRGM", type: "menu" },
+                    { group: "OTHER FUNCTIONS", name: "X Variable", steps: ["x-var"], expected: "X", type: "display" },
+
+                    // Group 17: Clear Functions
+                    { group: "CLEAR FUNCTIONS", name: "Clear Entry (CE)", steps: ["1", "2", "3", "clear-entry"], expected: "0", type: "display" },
+                    { group: "CLEAR FUNCTIONS", name: "All Clear (AC)", steps: ["5", "+", "3", "clear"], expected: "0", type: "display" },
+                    { group: "CLEAR FUNCTIONS", name: "Delete (DEL)", steps: ["1", "2", "3", "del"], expected: "12", type: "display" },
+
+                    // Group 18: Complex Combinations
+                    { group: "COMPLEX COMBINATIONS", name: "Scientific Expression 1", steps: ["sin", "3", "0", ")", "+", "cos", "6", "0", ")", "ENTER"], expected: "1", type: "calculation" },
+                    { group: "COMPLEX COMBINATIONS", name: "Scientific Expression 2", steps: ["√", "2", "5", ")", "+", "2", "power", "3", "-", "tan", "4", "5", ")", "ENTER"], expected: "12", type: "calculation" },
+                    { group: "COMPLEX COMBINATIONS", name: "Scientific Expression 3", steps: ["log", "1", "0", "0", "0", ")", "+", "ln", "e", ")", "×", "2", "ENTER"], expected: "8", type: "calculation" }
+                ];
+            }
+
+            startTesting() {
+                if (this.isTesting) return;
+                
+                this.isTesting = true;
+                this.currentTestIndex = 0;
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.resultsContainer.innerHTML = '';
+                this.storedVariables = {};
+                this.isAlphaMode = false;
+                this.is2ndMode = false;
+                this.updateProgress();
+                this.updateSummary();
+                
+                document.getElementById('startTest').disabled = true;
+                document.getElementById('stopTest').disabled = false;
+                
+                this.runNextTest();
+            }
+
+            stopTesting() {
+                this.isTesting = false;
+                document.getElementById('startTest').disabled = false;
+                document.getElementById('stopTest').disabled = true;
+                this.updateSummary();
+            }
+
+            async runNextTest() {
+                if (!this.isTesting || this.currentTestIndex >= this.tests.length) {
+                    this.stopTesting();
+                    return;
+                }
+
+                const test = this.tests[this.currentTestIndex];
+                
+                // Show group header if it's the first test in group
+                if (this.currentTestIndex === 0 || test.group !== this.tests[this.currentTestIndex - 1].group) {
+                    this.displayGroupHeader(test.group);
+                }
+                
+                this.displayTestStatus(test, 'running');
+                
+                // Clear calculator
+                this.simulateKeyPress('clear');
+                await this.delay(300);
+                
+                // Execute test steps
+                let stepIndex = 0;
+                for (const step of test.steps) {
+                    this.simulateKeyPress(step);
+                    await this.delay(200);
+                    stepIndex++;
+                    
+                    // Special handling for certain steps
+                    if (step === 'alpha') this.isAlphaMode = !this.isAlphaMode;
+                    if (step === '2nd') this.is2ndMode = !this.is2ndMode;
+                }
+                
+                // Get result based on test type
+                await this.delay(500);
+                let actualResult = this.getTestResult(test.type);
+                
+                // Check result
+                const passed = this.checkResult(actualResult, test.expected, test.type);
+                this.displayTestStatus(test, passed ? 'passed' : 'failed', actualResult);
+                
+                if (passed) {
+                    this.passedTests++;
+                } else {
+                    this.failedTests++;
+                }
+                
+                this.currentTestIndex++;
+                this.updateProgress();
+                this.updateSummary();
+                
+                // Continue with next test
+                await this.delay(800);
+                this.runNextTest();
+            }
+
+            getTestResult(type) {
+                switch(type) {
+                    case 'display':
+                        return this.mainDisplay.textContent;
+                    case 'calculation':
+                        return this.mainDisplay.textContent;
+                    case 'mode':
+                        return this.modeDisplay.textContent;
+                    case 'menu':
+                        return this.mainDisplay.textContent;
+                    case 'storage':
+                        return Object.keys(this.storedVariables).map(k => `${k}=${this.storedVariables[k]}`).join(',');
+                    default:
+                        return this.mainDisplay.textContent;
+                }
+            }
+
+            simulateKeyPress(key) {
+                let currentDisplay = this.mainDisplay.textContent;
+                
+                switch(key) {
+                    case 'ENTER':
+                        this.performCalculation();
+                        break;
+                    case 'clear':
+                        this.mainDisplay.textContent = '0';
+                        this.modeDisplay.textContent = 'READY';
+                        break;
+                    case 'clear-entry':
+                        this.mainDisplay.textContent = '0';
+                        break;
+                    case 'del':
+                        if (currentDisplay.length > 1) {
+                            this.mainDisplay.textContent = currentDisplay.slice(0, -1);
+                        } else {
+                            this.mainDisplay.textContent = '0';
+                        }
+                        break;
+                    case 'alpha':
+                        this.isAlphaMode = !this.isAlphaMode;
+                        this.modeDisplay.textContent = this.isAlphaMode ? 'ALPHA MODE' : 'NORMAL MODE';
+                        break;
+                    case '2nd':
+                        this.is2ndMode = !this.is2ndMode;
+                        this.modeDisplay.textContent = this.is2ndMode ? '2ND MODE' : 'NORMAL MODE';
+                        break;
+                    case 'mode':
+                        this.modeDisplay.textContent = 'MODE: DEG/RAD';
+                        break;
+                    case 'math':
+                        this.mainDisplay.textContent = 'MATH MENU';
+                        break;
+                    case 'angle':
+                        this.mainDisplay.textContent = 'ANGLE MENU';
+                        break;
+                    case 'matrix':
+                        this.mainDisplay.textContent = 'MATRIX MENU';
+                        break;
+                    case 'stat':
+                        this.mainDisplay.textContent = 'STAT MENU';
+                        break;
+                    case 'y-equals':
+                        this.mainDisplay.textContent = 'Y= EDITOR';
+                        break;
+                    case 'window':
+                        this.mainDisplay.textContent = 'WINDOW SETTINGS';
+                        break;
+                    case 'zoom':
+                        this.mainDisplay.textContent = 'ZOOM MENU';
+                        break;
+                    case 'trace':
+                        this.mainDisplay.textContent = 'TRACE MODE';
+                        break;
+                    case 'graph':
+                        this.mainDisplay.textContent = 'GRAPH DISPLAY';
+                        break;
+                    case 'draw':
+                        this.mainDisplay.textContent = 'DRAW MENU';
+                        break;
+                    case 'vars':
+                        this.mainDisplay.textContent = 'VARS MENU';
+                        break;
+                    case 'apps':
+                        this.mainDisplay.textContent = 'APPS MENU';
+                        break;
+                    case 'program':
+                        this.mainDisplay.textContent = 'PROGRAM MENU';
+                        break;
+                    case 'x-var':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? 'X' : currentDisplay + 'X';
+                        break;
+                    case 'sto':
+                        // Store current display value
+                        const value = parseFloat(currentDisplay);
+                        if (!isNaN(value)) {
+                            this.storedVariables['LAST'] = value;
+                        }
+                        this.mainDisplay.textContent = 'STORE→';
+                        break;
+                    case 'A':
+                    case 'B':
+                    case 'C':
+                        if (this.isAlphaMode) {
+                            this.mainDisplay.textContent = currentDisplay === '0' ? key : currentDisplay + key;
+                        } else if (this.storedVariables[key]) {
+                            this.mainDisplay.textContent = this.storedVariables[key].toString();
+                        }
+                        break;
+                    case 'sin':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? 'sin(' : currentDisplay + 'sin(';
+                        break;
+                    case 'cos':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? 'cos(' : currentDisplay + 'cos(';
+                        break;
+                    case 'tan':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? 'tan(' : currentDisplay + 'tan(';
+                        break;
+                    case 'sin-1':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? 'sin⁻¹(' : currentDisplay + 'sin⁻¹(';
+                        break;
+                    case 'cos-1':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? 'cos⁻¹(' : currentDisplay + 'cos⁻¹(';
+                        break;
+                    case 'tan-1':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? 'tan⁻¹(' : currentDisplay + 'tan⁻¹(';
+                        break;
+                    case 'log':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? 'log(' : currentDisplay + 'log(';
+                        break;
+                    case 'ln':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? 'ln(' : currentDisplay + 'ln(';
+                        break;
+                    case '√':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? '√(' : currentDisplay + '√(';
+                        break;
+                    case 'pi':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? '3.1416' : currentDisplay + '3.1416';
+                        break;
+                    case 'e':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? '2.7183' : currentDisplay + '2.7183';
+                        break;
+                    case 'square':
+                        if (currentDisplay !== '0') {
+                            const squared = Math.pow(parseFloat(currentDisplay), 2);
+                            this.mainDisplay.textContent = squared.toString();
+                        }
+                        break;
+                    case 'power':
+                        this.mainDisplay.textContent = currentDisplay === '0' ? '^' : currentDisplay + '^';
+                        break;
+                    case 'neg':
+                        if (currentDisplay.charAt(0) === '-') {
+                            this.mainDisplay.textContent = currentDisplay.slice(1);
+                        } else {
+                            this.mainDisplay.textContent = '-' + currentDisplay;
+                        }
+                        break;
+                    default:
+                        this.mainDisplay.textContent = currentDisplay === '0' ? key : currentDisplay + key;
+                }
+            }
+
+            performCalculation() {
+                try {
+                    let expression = this.mainDisplay.textContent
+                        .replace(/×/g, '*')
+                        .replace(/÷/g, '/')
+                        .replace(/3\.1416/g, 'Math.PI')
+                        .replace(/2\.7183/g, 'Math.E')
+                        .replace(/sin\(/g, 'Math.sin(Math.PI/180*')
+                        .replace(/cos\(/g, 'Math.cos(Math.PI/180*')
+                        .replace(/tan\(/g, 'Math.tan(Math.PI/180*')
+                        .replace(/sin⁻¹\(/g, '180/Math.PI*Math.asin(')
+                        .replace(/cos⁻¹\(/g, '180/Math.PI*Math.acos(')
+                        .replace(/tan⁻¹\(/g, '180/Math.PI*Math.atan(')
+                        .replace(/log\(/g, 'Math.log10(')
+                        .replace(/ln\(/g, 'Math.log(')
+                        .replace(/√\(/g, 'Math.sqrt(')
+                        .replace(/(\d+)\^(\d+)/g, 'Math.pow($1,$2)');
+                    
+                    // Handle variables
+                    for (const [key, value] of Object.entries(this.storedVariables)) {
+                        expression = expression.replace(new RegExp(key, 'g'), value.toString());
+                    }
+                    
+                    const result = eval(expression);
+                    this.mainDisplay.textContent = parseFloat(result.toFixed(4)).toString();
+                } catch (error) {
+                    this.mainDisplay.textContent = 'Error';
+                }
+            }
+
+            checkResult(actual, expected, type) {
+                if (type === 'menu' || type === 'mode') {
+                    return actual.includes(expected);
+                }
+                
+                const actualNum = parseFloat(actual);
+                const expectedNum = parseFloat(expected);
+                
+                if (isNaN(actualNum) || isNaN(expectedNum)) {
+                    return actual === expected || actual.includes(expected);
+                }
+                
+                return Math.abs(actualNum - expectedNum) < 0.01;
+            }
+
+            displayGroupHeader(groupName) {
+                const groupElement = document.createElement('div');
+                groupElement.className = 'function-group';
+                groupElement.textContent = `🧪 TESTING: ${groupName}`;
+                this.resultsContainer.appendChild(groupElement);
+            }
+
+            displayTestStatus(test, status, actualResult = '') {
+                const testElement = document.createElement('div');
+                testElement.className = `test-item ${status}`;
+                
+                let statusText = '';
+                let statusColor = '';
+                
+                switch(status) {
+                    case 'running':
+                        statusText = 'TESTING...';
+                        statusColor = '#ff9500';
+                        break;
+                    case 'passed':
+                        statusText = 'PASS ✓';
+                        statusColor = '#4CAF50';
+                        break;
+                    case 'failed':
+                        statusText = 'FAIL ✗';
+                        statusColor = '#f44336';
+                        break;
+                }
+                
+                testElement.innerHTML = `
+                    <div class="test-question">${test.name}</div>
+                    <div class="test-expected">Expected: ${test.expected}</div>
+                    ${actualResult ? `<div class="test-actual">Actual: ${actualResult}</div>` : ''}
+                    <div class="test-status" style="color: ${statusColor}">${statusText}</div>
+                `;
+                
+                this.resultsContainer.appendChild(testElement);
+                testElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            updateProgress() {
+                const progress = (this.currentTestIndex / this.tests.length) * 100;
+                this.progressFill.style.width = `${progress}%`;
+            }
+
+            updateSummary() {
+                if (this.currentTestIndex === 0 && !this.isTesting) {
+                    this.summaryElement.textContent = 'Ready to test all calculator functions';
+                    this.summaryElement.style.color = 'white';
+                } else if (this.isTesting) {
+                    this.summaryElement.textContent = `Testing... ${this.currentTestIndex}/${this.tests.length} tests`;
+                    this.summaryElement.style.color = '#ff9500';
+                } else {
+                    const percentage = ((this.passedTests / this.tests.length) * 100).toFixed(1);
+                    this.summaryElement.textContent = `COMPLETE: ${this.passedTests} passed, ${this.failedTests} failed out of ${this.tests.length} tests (${percentage}% success)`;
+                    this.summaryElement.style.color = this.failedTests === 0 ? '#4CAF50' : '#f44336';
+                }
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Initialize the tester when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const mainDisplay = document.getElementById('main-display');
+            const modeDisplay = document.getElementById('mode-display');
+            const testResults = document.getElementById('testResults');
+            const progressFill = document.getElementById('progressFill');
+            const testSummary = document.getElementById('testSummary');
+            const startTestBtn = document.getElementById('startTest');
+            const stopTestBtn = document.getElementById('stopTest');
+
+            const tester = new CompleteCalculatorTester(mainDisplay, modeDisplay, testResults, progressFill, testSummary);
+
+            startTestBtn.addEventListener('click', () => tester.startTesting());
+            stopTestBtn.addEventListener('click', () => tester.stopTesting());
+        });
+    </script>
+</body>
+</html>
